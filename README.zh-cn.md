@@ -7,6 +7,7 @@
 
 <div align="center">
   <h1>Framelink MCP for Figma 服务器</h1>
+  <h2>THIS IS DEV FORK WITH CACHING FEATURE ADDED! USE IT UNTIL THE FEATURE WILL BE MERGED INTO UPSTREAM</h2>
   <p>
     🌐 可用语言:
     <a href="README.md">English (英语)</a> |
@@ -15,18 +16,11 @@
     <a href="README.zh-tw.md">繁體中文 (繁体中文)</a>
   </p>
   <h3>为您的编码代理提供 Figma 数据访问权限。<br/>一次性在任何框架中实现设计。</h3>
-  <a href="https://npmcharts.com/compare/figma-developer-mcp?interval=30">
-    <img alt="每周下载" src="https://img.shields.io/npm/dm/figma-developer-mcp.svg">
+  <a href="https://npmcharts.com/compare/figma-developer-mcp-caching-dev-fork?interval=30">
+    <img alt="每周下载" src="https://img.shields.io/npm/dm/figma-developer-mcp-caching-dev-fork.svg">
   </a>
-  <a href="https://github.com/GLips/Figma-Context-MCP/blob/main/LICENSE">
-    <img alt="MIT 许可证" src="https://img.shields.io/github/license/GLips/Figma-Context-MCP" />
-  </a>
-  <a href="https://framelink.ai/discord">
-    <img alt="Discord" src="https://img.shields.io/discord/1352337336913887343?color=7389D8&label&logo=discord&logoColor=ffffff" />
-  </a>
-  <br />
-  <a href="https://twitter.com/glipsman">
-    <img alt="Twitter" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fglipsman&label=%40glipsman" />
+  <a href="https://github.com/stone-w4tch3r/Figma-Context-MCP/blob/main/LICENSE">
+    <img alt="MIT 许可证" src="https://img.shields.io/github/license/stone-w4tch3r/Figma-Context-MCP" />
   </a>
 </div>
 
@@ -59,7 +53,7 @@
 
 许多代码编辑器和其他 AI 客户端使用配置文件来管理 MCP 服务器。
 
-可以通过将以下内容添加到配置文件中来设置 `figma-developer-mcp` 服务器。
+此缓存分叉（以 `figma-developer-mcp-caching-dev-fork` 发布）可通过在配置文件中添加以下内容进行配置。
 
 > 注意：您需要创建 Figma 访问令牌才能使用此服务器。有关如何创建 Figma API 访问令牌的说明，请参见[此处](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens)。
 
@@ -70,7 +64,7 @@
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
@@ -83,19 +77,44 @@
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["/c", "npx", "-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
 ```
 
-或者您可以在 `env` 字段中设置 `FIGMA_API_KEY` 和 `PORT`。
+如果您更喜欢通过环境变量管理凭据（推荐），请将其放在服务器定义旁的 `env` 对象中。例如 Cursor 配置：
+
+```jsonc
+{
+  "mcpServers": {
+    "Framelink MCP for Figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "YOUR-KEY",
+        "FIGMA_CACHING": "{\"ttl\":{\"value\":30,\"unit\":\"d\"}}",
+        "PORT": "3333"
+      }
+    }
+  }
+}
+```
 
 有关如何配置 Framelink MCP for Figma 服务器的更多信息，请参阅 [Framelink 文档](https://www.framelink.ai/docs/quickstart?utm_source=github&utm_medium=readme&utm_campaign=readme)。
 
-## 星标历史
+### Support for free Figma accounts: Persistent caching (optional)
 
-<a href="https://star-history.com/#GLips/Figma-Context-MCP"><img src="https://api.star-history.com/svg?repos=GLips/Figma-Context-MCP&type=Date" alt="星标历史图表" width="600" /></a>
+为避免触发 Figma 严格的速率限制，可以通过 JSON `FIGMA_CACHING` 环境变量启用磁盘缓存。
+
+```bash
+FIGMA_CACHING='{ "ttl": { "value": 30, "unit": "d" } }'
+```
+
+- `cacheDir`（可选）控制缓存文件写入位置。相对路径相对当前工作目录，`~` 展开为主目录。省略时默认：Linux `~/.cache/figma-mcp`、macOS `~/Library/Caches/FigmaMcp`、Windows `%LOCALAPPDATA%/FigmaMcpCache`。
+- `ttl` 控制缓存有效期，必须包含 `value`（数字）和 `unit`（`ms`/`s`/`m`/`h`/`d`）。
+
+启用缓存后，服务器会先获取一次完整 Figma 文件并写入磁盘，在 `get_figma_data` / `get_raw_node` 的后续请求中于过期前直接返回缓存。要强制刷新，请删除 `cacheDir` 内的文件。不设置 `FIGMA_CACHING` 则保持默认非缓存行为。
 
 ## 了解更多
 

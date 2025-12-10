@@ -7,6 +7,7 @@
 
 <div align="center">
   <h1>Framelink MCP for Figma 서버</h1>
+  <h2>THIS IS DEV FORK WITH CACHING FEATURE ADDED! USE IT UNTIL THE FEATURE WILL BE MERGED INTO UPSTREAM</h2>
   <p>
     🌐 다른 언어:
     <a href="README.md">English (영어)</a> |
@@ -15,18 +16,11 @@
     <a href="README.zh-tw.md">繁體中文 (중국어 번체)</a>
   </p>
   <h3>코딩 에이전트에게 Figma 데이터에 대한 접근 권한을 부여하세요.<br/>한 번에 모든 프레임워크에서 디자인을 구현하세요.</h3>
-  <a href="https://npmcharts.com/compare/figma-developer-mcp?interval=30">
-    <img alt="주간 다운로드" src="https://img.shields.io/npm/dm/figma-developer-mcp.svg">
+  <a href="https://npmcharts.com/compare/figma-developer-mcp-caching-dev-fork?interval=30">
+    <img alt="주간 다운로드" src="https://img.shields.io/npm/dm/figma-developer-mcp-caching-dev-fork.svg">
   </a>
-  <a href="https://github.com/GLips/Figma-Context-MCP/blob/main/LICENSE">
-    <img alt="MIT 라이선스" src="https://img.shields.io/github/license/GLips/Figma-Context-MCP" />
-  </a>
-  <a href="https://framelink.ai/discord">
-    <img alt="Discord" src="https://img.shields.io/discord/1352337336913887343?color=7389D8&label&logo=discord&logoColor=ffffff" />
-  </a>
-  <br />
-  <a href="https://twitter.com/glipsman">
-    <img alt="Twitter" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fglipsman&label=%40glipsman" />
+  <a href="https://github.com/stone-w4tch3r/Figma-Context-MCP/blob/main/LICENSE">
+    <img alt="MIT 라이선스" src="https://img.shields.io/github/license/stone-w4tch3r/Figma-Context-MCP" />
   </a>
 </div>
 
@@ -59,7 +53,7 @@ Cursor가 Figma 디자인 데이터에 접근할 수 있을 때, 스크린샷을
 
 많은 코드 편집기와 기타 AI 클라이언트는 MCP 서버를 관리하기 위해 구성 파일을 사용합니다.
 
-`figma-developer-mcp` 서버는 다음을 구성 파일에 추가하여 설정할 수 있습니다.
+이 캐싱 포크(`figma-developer-mcp-caching-dev-fork`로 게시됨)를 사용하려면 구성 파일에 다음을 추가하세요.
 
 > 참고: 이 서버를 사용하려면 Figma 액세스 토큰을 생성해야 합니다. Figma API 액세스 토큰을 생성하는 방법에 대한 지침은 [여기](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens)에서 찾을 수 있습니다.
 
@@ -70,7 +64,7 @@ Cursor가 Figma 디자인 데이터에 접근할 수 있을 때, 스크린샷을
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
@@ -83,19 +77,44 @@ Cursor가 Figma 디자인 데이터에 접근할 수 있을 때, 스크린샷을
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["/c", "npx", "-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
 ```
 
-또는 `env` 필드에 `FIGMA_API_KEY`와 `PORT`를 넣을 수 있습니다.
+환경 변수로 관리하는 예시(권장):
+
+```jsonc
+{
+  "mcpServers": {
+    "Framelink MCP for Figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "YOUR-KEY",
+        "FIGMA_CACHING": "{\"ttl\":{\"value\":30,\"unit\":\"d\"}}",
+        "PORT": "3333"
+      }
+    }
+  }
+}
+```
 
 Framelink MCP for Figma 서버를 구성하는 방법에 대한 자세한 정보가 필요하면 [Framelink 문서](https://www.framelink.ai/docs/quickstart?utm_source=github&utm_medium=readme&utm_campaign=readme)를 참조하세요.
 
-## 스타 히스토리
+### Support for free Figma accounts: Persistent caching (optional)
 
-<a href="https://star-history.com/#GLips/Figma-Context-MCP"><img src="https://api.star-history.com/svg?repos=GLips/Figma-Context-MCP&type=Date" alt="스타 히스토리 차트" width="600" /></a>
+Figma의 강한 레이트 리밋을 피하려면 JSON 형태의 `FIGMA_CACHING` 환경 변수를 설정해 디스크 캐시를 활성화하세요.
+
+```bash
+FIGMA_CACHING='{ "ttl": { "value": 30, "unit": "d" } }'
+```
+
+- `cacheDir` (선택) 캐시 저장 경로. 상대 경로는 현재 디렉토리 기준, `~`는 홈으로 확장. 기본값: Linux `~/.cache/figma-mcp`, macOS `~/Library/Caches/FigmaMcp`, Windows `%LOCALAPPDATA%/FigmaMcpCache`.
+- `ttl` 캐시 유효 기간. `value`(숫자)와 `unit`(`ms`/`s`/`m`/`h`/`d`)을 포함해야 합니다.
+
+캐시를 켜면 첫 호출 시 전체 Figma 파일을 저장하고, `get_figma_data` / `get_raw_node` 후속 요청은 만료 전까지 캐시를 반환합니다. 강제로 새로고침하려면 `cacheDir`의 파일을 삭제하세요. `FIGMA_CACHING`을 설정하지 않으면 기존 비캐시 동작을 유지합니다.
 
 ## 더 알아보기
 
