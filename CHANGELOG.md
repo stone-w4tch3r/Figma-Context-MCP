@@ -1,5 +1,11 @@
 # figma-developer-mcp
 
+## 0.8.0
+
+### Minor Changes
+
+- [`6c76c95`](https://github.com/GLips/Figma-Context-MCP/commit/6c76c950f498a9760dd37e380ceca223e7d0093b) Thanks [@stone-w4tch3r](https://github.com/stone-w4tch3r)! - added caching support + repackage tmp fork version to npm
+
 ## 0.6.4
 
 ### Patch Changes

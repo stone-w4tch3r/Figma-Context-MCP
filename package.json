@@ -1,6 +1,6 @@
 {
   "name": "figma-developer-mcp-caching-dev-fork",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "mcpName": "io.github.GLips/Figma-Context-MCP",
   "description": "Dev fork of Framelink's Figma MCP server with persistent caching until upstream merge.",
   "type": "module",
