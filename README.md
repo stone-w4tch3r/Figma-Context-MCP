@@ -7,6 +7,7 @@
 
 <div align="center">
   <h1>Framelink MCP for Figma</h1>
+  <h2>THIS IS DEV FORK WITH CACHING FEATURE ADDED! USE IT UNTIL THE FEATURE WILL BE MERGED INTO UPSTREAM</h2>
   <p>
     🌐 Available in:
     <a href="README.ko.md">한국어 (Korean)</a> |
@@ -18,15 +19,8 @@
   <a href="https://npmcharts.com/compare/figma-developer-mcp?interval=30">
     <img alt="weekly downloads" src="https://img.shields.io/npm/dm/figma-developer-mcp.svg">
   </a>
-  <a href="https://github.com/GLips/Figma-Context-MCP/blob/main/LICENSE">
-    <img alt="MIT License" src="https://img.shields.io/github/license/GLips/Figma-Context-MCP" />
-  </a>
-  <a href="https://framelink.ai/discord">
-    <img alt="Discord" src="https://img.shields.io/discord/1352337336913887343?color=7389D8&label&logo=discord&logoColor=ffffff" />
-  </a>
-  <br />
-  <a href="https://twitter.com/glipsman">
-    <img alt="Twitter" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fglipsman&label=%40glipsman" />
+  <a href="https://github.com/stone-w4tch3r/Figma-Context-MCP/blob/main/LICENSE">
+    <img alt="MIT License" src="https://img.shields.io/github/license/stone-w4tch3r/Figma-Context-MCP" />
   </a>
 </div>
 
@@ -70,7 +64,7 @@ The `figma-developer-mcp` server can be configured by adding the following to yo
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
@@ -83,7 +77,7 @@ The `figma-developer-mcp` server can be configured by adding the following to yo
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": ["/c", "npx", "-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
@@ -96,7 +90,7 @@ If you prefer to manage credentials via environment variables (as recommended in
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "args": ["-y", "figma-developer-mcp-caching-dev-fork", "--stdio"],
       "env": {
         "FIGMA_API_KEY": "YOUR-KEY",
         "FIGMA_CACHING": "{\"ttl\":{\"value\":30,\"unit\":\"d\"}}",
@@ -123,10 +117,6 @@ Put this var into your mcp config json, see example above.
 - `ttl` controls how long a cached file remains valid. It must contain a `value` (number) and a `unit` (`ms`, `s`, `m`, `h`, or `d`).
 
 When caching is enabled the server always fetches the full Figma file once, stores it on disk, and serves subsequent `get_figma_data` / `get_raw_node` requests from the cached copy until it expires. Delete the files inside `cacheDir` if you need to force a refresh. Leaving `FIGMA_CACHING` unset keeps the default non-cached behavior.
-
-## Star History
-
-<a href="https://star-history.com/#GLips/Figma-Context-MCP"><img src="https://api.star-history.com/svg?repos=GLips/Figma-Context-MCP&type=Date" alt="Star History Chart" width="600" /></a>
 
 ## Learn More
 
