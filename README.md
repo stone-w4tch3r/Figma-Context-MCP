@@ -16,8 +16,8 @@
     <a href="README.zh-tw.md">繁體中文 (Traditional Chinese)</a>
   </p>
   <h3>Give your coding agent access to your Figma data.<br/>Implement designs in any framework in one-shot.</h3>
-  <a href="https://npmcharts.com/compare/figma-developer-mcp?interval=30">
-    <img alt="weekly downloads" src="https://img.shields.io/npm/dm/figma-developer-mcp.svg">
+  <a href="https://npmcharts.com/compare/figma-developer-mcp-caching-dev-fork?interval=30">
+    <img alt="weekly downloads" src="https://img.shields.io/npm/dm/figma-developer-mcp-caching-dev-fork.svg">
   </a>
   <a href="https://github.com/stone-w4tch3r/Figma-Context-MCP/blob/main/LICENSE">
     <img alt="MIT License" src="https://img.shields.io/github/license/stone-w4tch3r/Figma-Context-MCP" />
@@ -53,7 +53,7 @@ Reducing the amount of context provided to the model helps make the AI more accu
 
 Many code editors and other AI clients use a configuration file to manage MCP servers.
 
-The `figma-developer-mcp` server can be configured by adding the following to your configuration file.
+This caching fork, published as `figma-developer-mcp-caching-dev-fork`, can be configured by adding the following to your configuration file.
 
 > NOTE: You will need to create a Figma access token to use this server. Instructions on how to create a Figma API access token can be found [here](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens).
 

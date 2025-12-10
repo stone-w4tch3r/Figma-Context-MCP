@@ -1,8 +1,8 @@
 {
   "name": "figma-developer-mcp-caching-dev-fork",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "mcpName": "io.github.GLips/Figma-Context-MCP",
-  "description": "Give your coding agent access to your Figma data. Implement designs in any framework in one-shot.",
+  "description": "Dev fork of Framelink's Figma MCP server with persistent caching until upstream merge.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -42,9 +42,12 @@
   "packageManager": "pnpm@10.10.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GLips/Figma-Context-MCP.git"
+    "url": "git+https://github.com/stone-w4tch3r/Figma-Context-MCP.git"
   },
-  "homepage": "https://www.framelink.ai",
+  "homepage": "https://github.com/stone-w4tch3r/Figma-Context-MCP#readme",
+  "bugs": {
+    "url": "https://github.com/stone-w4tch3r/Figma-Context-MCP/issues"
+  },
   "keywords": [
     "figma",
     "mcp",

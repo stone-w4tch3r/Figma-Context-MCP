@@ -10,7 +10,7 @@ on:
 
 jobs:
   beta-release:
-    if: ${{ github.repository_owner == 'GLips' }}
+    if: ${{ github.repository_owner == 'stone-w4tch3r' }}
     name: Create a beta release
     runs-on: ubuntu-latest
     steps:

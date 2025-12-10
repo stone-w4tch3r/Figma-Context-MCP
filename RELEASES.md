@@ -1,6 +1,6 @@
 # Release Guide
 
-This project uses [Changesets](https://github.com/changesets/changesets) for automated versioning and publishing, with separate workflows for stable releases (main branch) and beta releases (beta branch).
+This project uses [Changesets](https://github.com/changesets/changesets) for automated versioning and publishing, with separate workflows for stable releases (main branch) and beta releases (beta branch). This fork publishes `figma-developer-mcp-caching-dev-fork` until caching lands upstream;
 
 ## Main Branch Releases (Stable)
 
@@ -83,10 +83,10 @@ This project uses [Changesets](https://github.com/changesets/changesets) for aut
 
 - Published to npm with `latest` tag
 - Follow semver: `1.2.3`
-- Users install with: `npm install figma-developer-mcp`
+- Users install with: `npm install figma-developer-mcp-caching-dev-fork`
 
 ### Beta Releases
 
 - Published to npm with `beta` tag
 - Follow semver with prerelease suffix: `1.2.3-beta.0`
-- Users install with: `npm install figma-developer-mcp@beta`
+- Users install with: `npm install figma-developer-mcp-caching-dev-fork@beta`

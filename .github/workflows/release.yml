@@ -10,7 +10,7 @@ on:
 
 jobs:
   release:
-    if: ${{ github.repository_owner == 'GLips' }}
+    if: ${{ github.repository_owner == 'stone-w4tch3r' }}
     name: Create a PR for release workflow
     runs-on: ubuntu-latest
     steps:
