@@ -1,5 +1,5 @@
 ---
-"figma-developer-mcp": minor
+"figma-developer-mcp-caching-dev-fork": minor
 ---
 
 Add configurable `--host` CLI option for remote deployments. Use `--host` CLI argument or `FRAMELINK_HOST` environment variable to bind to addresses other than localhost (e.g., `0.0.0.0` for network access).
