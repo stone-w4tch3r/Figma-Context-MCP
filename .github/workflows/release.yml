@@ -47,10 +47,12 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Publish to npm
-        run: pnpm publish --no-git-checks
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc
+          pnpm publish --no-git-checks
         env:
           NODE_ENV: production
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Update server.json version
