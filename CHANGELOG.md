@@ -1,5 +1,34 @@
 # figma-developer-mcp
 
+## [0.16.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.15.0...v0.16.0) (2026-02-26)
+
+
+### Features
+
+* Extracting global variables ([bb52df2](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/bb52df2835a7d34b588ab553e8807ff4c1a3d356))
+* Extracting global variables ([03143b8](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/03143b834385176b474bed22660120dd36a86970))
+* Include component and component set names to help LLMs find pre-existing components in code ([#122](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/122)) ([60c663e](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/60c663e6a83886b03eb2cde7c60433439e2cedd0))
+* **security:** add input validation to download images tool ([#207](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/207)) ([651974e](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/651974e6f31a3b60b863dab12e69029c710dd1c0))
+* **security:** add path sanitization to prevent directory traversal ([#206](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/206)) ([5a18eef](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/5a18eef889b0449894e835f71b15786e4e36dd10))
+* sync fork with upstream - release-please migration, vitest, repo cleanup ([2124f43](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/2124f43fa5a27135c06b53b1da6b8e3733990be4))
+
+
+### Bug Fixes
+
+* add NODE_AUTH_TOKEN to npm publish step in release workflow ([f82d614](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/f82d614e932e90d779255e81d58a19eb2098cfdd))
+* Cannot find module '~/transformers/layout' ([7432d6c](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/7432d6ca28796327aec9f4fdd4b2948b95b49a08))
+* Cannot find module '~/transformers/layout' ([82a52f7](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/82a52f7e4b349268995633f229e03ee034cce8b5))
+* configure pnpm npmrc for npm registry auth in release workflow ([355ddcb](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/355ddcb9b99929f0061deecb7c8f61ec527b8380))
+* enhance fetchWithRetry to handle error statuses in response body ([803a479](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/803a479c2a3f0e8b8636f498728b5aaca2e30580))
+* Fix bug where MCP cannot be invoked by cursor 0.45.11 ([dbea364](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/dbea36451cbf68f6d1dd814fed01743a1fdd27f4))
+* Make sure LLM provides a filename extension when calling download_figma_images ([00bad7d](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/00bad7dae48a6d0cc55d78560cc691a39271f151))
+* README.zh-tw typo ([#236](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/236)) ([c65c25c](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/c65c25c16f19c7f05c05f976b26cc5fbd2bcb19a))
+* Remove empty keys from simplified design output ([#106](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/106)) ([4237a53](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/4237a5363f696dcf7abe046940180b6861bdcf22))
+* Replaced the NODE_ENV setting with cross-env to improve cross-platform compatibility. ([#19](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/19)) ([a0eeed5](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/a0eeed588002915df1489346880372a5896b3fdb))
+* update Node ID regex to support additional formats in download i… ([#227](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/227)) ([68fbc87](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/68fbc87645d25c57252d4d9bec5f43ee4238b09f))
+* use npm publish instead of pnpm publish for registry auth ([69cdcc2](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/69cdcc23bbab93c7642ec039dae903426d8ca911))
+* write project-level .npmrc for pnpm publish auth ([c93f485](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/c93f485c73a584b3768a37baa96ba5621a0ba5b2))
+
 ## 0.9.0
 
 ### Minor Changes
