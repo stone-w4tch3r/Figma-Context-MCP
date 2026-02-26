@@ -1,12 +1,5 @@
 # figma-developer-mcp
 
-## [0.10.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.9.0...v0.10.0) (2026-02-26)
-
-
-### Features
-
-* sync fork with upstream - release-please migration, vitest, repo cleanup ([2124f43](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/2124f43fa5a27135c06b53b1da6b8e3733990be4))
-
 ## 0.9.0
 
 ### Minor Changes
