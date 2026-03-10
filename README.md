@@ -101,13 +101,16 @@ If you need more information on how to configure the Framelink MCP for Figma, se
 To avoid hitting Figma's heavy rate limits, you can tell the MCP server to cache full file responses on disk by setting a `FIGMA_CACHING` environment variable that contains a JSON object.
 
 ```bash
-FIGMA_CACHING='{ "ttl": { "value": 30, "unit": "d" } }'
+FIGMA_CACHING='{ "ttl": { "value": 30, "unit": "d" }, "cacheType": "node"  }'
 ```
 
 Put this var into your mcp config json, see example above.
 
 - `cacheDir` (optional) controls where cached files are written. Relative paths are resolved against the current working directory and `~` expands to your home directory. If you omit it, the server defaults to `~/.cache/figma-mcp` on Linux, `~/Library/Caches/FigmaMcp` on macOS, and `%LOCALAPPDATA%/FigmaMcpCache` on Windows.
 - `ttl` controls how long a cached file remains valid. It must contain a `value` (number) and a `unit` (`ms`, `s`, `m`, `h`, or `d`).
+- `cacheType` (optional) controls the cache granularity. Two modes are available:
+  - `default` (default) — caches the entire Figma file by `fileKey`. One cache file per Figma document.
+  - `node` — caches by `fileKey` + `nodeId`. Each node gets its own cache file (e.g. `abc123-6995-3570.json`). Use this when a full-file response exceeds the MCP transfer size limit.
 
 When caching is enabled the server always fetches the full Figma file once, stores it on disk, and serves subsequent `get_figma_data` / `get_raw_node` requests from the cached copy until it expires. Delete the files inside `cacheDir` if you need to force a refresh. Leaving `FIGMA_CACHING` unset keeps the default non-cached behavior.
 
