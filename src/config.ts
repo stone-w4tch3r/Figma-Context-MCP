@@ -4,7 +4,7 @@ import { hideBin } from "yargs/helpers";
 import os from "os";
 import { isAbsolute, join, resolve } from "path";
 import type { FigmaAuthOptions } from "./services/figma.js";
-import type { FigmaCachingOptions } from "./services/figma-file-cache.js";
+import type { FigmaCachingOptions, FigmaCacheType } from "./services/figma-file-cache.js";
 
 interface ServerConfig {
   auth: FigmaAuthOptions;
@@ -226,7 +226,7 @@ export function getServerConfig(isStdioMode: boolean): ServerConfig {
       `- SKIP_IMAGE_DOWNLOADS: ${config.skipImageDownloads} (source: ${config.configSources.skipImageDownloads})`,
     );
     console.log(
-      `- FIGMA_CACHING: ${config.caching ? JSON.stringify({ cacheDir: config.caching.cacheDir, ttlMs: config.caching.ttlMs }) : "disabled"}`,
+      `- FIGMA_CACHING: ${config.caching ? JSON.stringify({ cacheDir: config.caching.cacheDir, ttlMs: config.caching.ttlMs, cacheType: config.caching.cacheType }) : "disabled"}`,
     );
     console.log(); // Empty line for better readability
   }
@@ -243,6 +243,7 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
   try {
     const parsed = JSON.parse(rawValue) as {
       cacheDir?: string;
+      cacheType?: FigmaCacheType;
       ttl: {
         value: number;
         unit: DurationUnit;
@@ -261,12 +262,21 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
       throw new Error("FIGMA_CACHING.ttl.unit must be one of ms, s, m, h, d");
     }
 
+    if (
+      parsed.cacheType !== undefined &&
+      parsed.cacheType !== "default" &&
+      parsed.cacheType !== "node"
+    ) {
+      throw new Error("FIGMA_CACHING.cacheType must be 'default' or 'node'");
+    }
+
     const ttlMs = parsed.ttl.value * DURATION_IN_MS[parsed.ttl.unit];
     const cacheDir = resolveCacheDir(parsed.cacheDir);
 
     return {
       cacheDir,
       ttlMs,
+      cacheType: parsed.cacheType ?? "default",
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

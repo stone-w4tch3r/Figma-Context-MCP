@@ -317,7 +317,30 @@ export class FigmaService {
     nodeId: string,
     depth?: number | null,
   ): Promise<{ data: GetFileNodesResponse; cacheInfo: CacheInfo }> {
+    if (this.fileCache && this.fileCache.cacheType === "node") {
+      // node mode: cache per fileKey+nodeId directly
+      const cacheResult = await this.fileCache.get(fileKey, nodeId);
+      if (cacheResult) {
+        const nodeResponse = cacheResult.data as GetFileNodesResponse;
+        writeLogs("figma-raw.json", nodeResponse);
+        return {
+          data: nodeResponse,
+          cacheInfo: { usedCache: true, cachedAt: cacheResult.cachedAt, ttlMs: cacheResult.ttlMs },
+        };
+      }
+
+      const endpoint = `/files/${fileKey}/nodes?ids=${nodeId}${depth ? `&depth=${depth}` : ""}`;
+      Logger.log(
+        `Retrieving raw Figma node: ${nodeId} from ${fileKey} (depth: ${depth ?? "default"})`,
+      );
+      const fresh = await this.request<GetFileNodesResponse>(endpoint);
+      await this.fileCache.set(fileKey, fresh, nodeId);
+      writeLogs("figma-raw.json", fresh);
+      return { data: fresh, cacheInfo: { usedCache: false } };
+    }
+
     if (this.fileCache) {
+      // default mode: load whole file from cache, extract node
       const cacheResult = await this.loadFileFromCache(fileKey);
       const nodeResponse = buildNodeResponseFromFile(cacheResult.data, nodeId, depth);
       writeLogs("figma-raw.json", nodeResponse);
@@ -346,7 +369,7 @@ export class FigmaService {
     const cacheResult = await this.fileCache.get(fileKey);
     if (cacheResult) {
       return {
-        data: cacheResult.data,
+        data: cacheResult.data as GetFileResponse,
         cacheInfo: {
           usedCache: true,
           cachedAt: cacheResult.cachedAt,
