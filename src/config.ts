@@ -223,6 +223,7 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
     const parsed = JSON.parse(rawValue) as {
       cacheDir?: string;
       cacheType?: FigmaCacheType;
+      subtreeRootsByFile?: Record<string, string[]>;
       ttl: {
         value: number;
         unit: DurationUnit;
@@ -244,21 +245,67 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
     if (
       parsed.cacheType !== undefined &&
       parsed.cacheType !== "default" &&
-      parsed.cacheType !== "node"
+      parsed.cacheType !== "subtree"
     ) {
-      throw new Error("FIGMA_CACHING.cacheType must be 'default' or 'node'");
+      throw new Error("FIGMA_CACHING.cacheType must be 'default' or 'subtree'");
     }
+
+    const cacheType = parsed.cacheType ?? "default";
+    const subtreeRootsByFile = parseSubtreeRootsByFile(parsed.subtreeRootsByFile, cacheType);
 
     return {
       cacheDir: resolveCacheDir(parsed.cacheDir),
       ttlMs: parsed.ttl.value * DURATION_IN_MS[parsed.ttl.unit],
-      cacheType: parsed.cacheType ?? "default",
+      cacheType,
+      subtreeRootsByFile,
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Failed to parse FIGMA_CACHING: ${message}`);
     process.exit(1);
   }
+}
+
+function parseSubtreeRootsByFile(
+  subtreeRootsByFile: Record<string, string[]> | undefined,
+  cacheType: FigmaCacheType,
+): Record<string, string[]> | undefined {
+  if (cacheType !== "subtree") {
+    return undefined;
+  }
+
+  if (!subtreeRootsByFile || Object.keys(subtreeRootsByFile).length === 0) {
+    throw new Error("FIGMA_CACHING.subtreeRootsByFile must contain at least one file entry");
+  }
+
+  return Object.fromEntries(
+    Object.entries(subtreeRootsByFile).map(([fileKey, rootNodeIds]) => {
+      if (!Array.isArray(rootNodeIds) || rootNodeIds.length === 0) {
+        throw new Error(
+          `FIGMA_CACHING.subtreeRootsByFile.${fileKey} must contain at least one root ID`,
+        );
+      }
+
+      const seenRootIds = new Set<string>();
+      for (const rootNodeId of rootNodeIds) {
+        if (typeof rootNodeId !== "string" || rootNodeId.length === 0) {
+          throw new Error(
+            `FIGMA_CACHING.subtreeRootsByFile.${fileKey} must only contain non-empty root IDs`,
+          );
+        }
+
+        if (seenRootIds.has(rootNodeId)) {
+          throw new Error(
+            `FIGMA_CACHING.subtreeRootsByFile.${fileKey} contains duplicate root ID ${rootNodeId}`,
+          );
+        }
+
+        seenRootIds.add(rootNodeId);
+      }
+
+      return [fileKey, rootNodeIds];
+    }),
+  );
 }
 
 function resolveCacheDir(inputPath?: string): string {

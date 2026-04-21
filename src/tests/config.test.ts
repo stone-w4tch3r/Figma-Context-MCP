@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { envBool, envInt, envStr, resolve } from "~/config.js";
+import { envBool, envInt, envStr, getServerConfig, resolve } from "~/config.js";
 
 describe("resolve", () => {
   it("CLI flag wins over env and default", () => {
@@ -87,3 +87,102 @@ describe("envBool", () => {
     expect(envBool("TEST_BOOL_MISSING")).toBeUndefined();
   });
 });
+
+describe("getServerConfig caching", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it("accepts subtree cache mode with subtree roots by file", () => {
+    vi.stubEnv(
+      "FIGMA_CACHING",
+      JSON.stringify({
+        cacheType: "subtree",
+        cacheDir: ".cache/figma",
+        subtreeRootsByFile: { FILE123: ["10:20"] },
+        ttl: { value: 1, unit: "d" },
+      }),
+    );
+
+    const config = getServerConfig({ stdio: true, figmaApiKey: "test-key" });
+
+    expect(config.caching).toMatchObject({
+      cacheType: "subtree",
+      subtreeRootsByFile: { FILE123: ["10:20"] },
+    });
+  });
+
+  it("defaults omitted cacheType to default", () => {
+    vi.stubEnv(
+      "FIGMA_CACHING",
+      JSON.stringify({
+        cacheDir: ".cache/figma",
+        ttl: { value: 1, unit: "d" },
+      }),
+    );
+
+    const config = getServerConfig({ stdio: true, figmaApiKey: "test-key" });
+
+    expect(config.caching?.cacheType).toBe("default");
+  });
+
+  it("rejects cacheType node", () => {
+    expectConfigExit({
+      cacheType: "node",
+      cacheDir: ".cache/figma",
+      ttl: { value: 1, unit: "d" },
+    });
+  });
+
+  it("rejects subtree mode without subtreeRootsByFile", () => {
+    expectConfigExit({
+      cacheType: "subtree",
+      cacheDir: ".cache/figma",
+      ttl: { value: 1, unit: "d" },
+    });
+  });
+
+  it("rejects empty subtreeRootsByFile", () => {
+    expectConfigExit({
+      cacheType: "subtree",
+      cacheDir: ".cache/figma",
+      subtreeRootsByFile: {},
+      ttl: { value: 1, unit: "d" },
+    });
+  });
+
+  it("rejects file entries with empty root arrays", () => {
+    expectConfigExit({
+      cacheType: "subtree",
+      cacheDir: ".cache/figma",
+      subtreeRootsByFile: { FILE123: [] },
+      ttl: { value: 1, unit: "d" },
+    });
+  });
+
+  it("rejects duplicate root IDs within one file entry", () => {
+    expectConfigExit({
+      cacheType: "subtree",
+      cacheDir: ".cache/figma",
+      subtreeRootsByFile: { FILE123: ["10:20", "10:20"] },
+      ttl: { value: 1, unit: "d" },
+    });
+  });
+});
+
+function expectConfigExit(cachingConfig: object): void {
+  vi.stubEnv("FIGMA_CACHING", JSON.stringify(cachingConfig));
+
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  const exitSpy = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null) => {
+    throw new Error(`process.exit:${code ?? "undefined"}`);
+  }) as never;
+
+  expect(() => getServerConfig({ stdio: true, figmaApiKey: "test-key" })).toThrow(
+    /process\.exit:1/,
+  );
+
+  expect(errorSpy).toHaveBeenCalled();
+  expect(exitSpy).toHaveBeenCalledWith(1);
+}

@@ -70,7 +70,14 @@ This caching fork, published as `figma-developer-mcp-caching-dev-fork`, can be c
   "mcpServers": {
     "Framelink MCP for Figma": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "figma-developer-mcp-caching-dev-fork", "--figma-api-key=YOUR-KEY", "--stdio"]
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "figma-developer-mcp-caching-dev-fork",
+        "--figma-api-key=YOUR-KEY",
+        "--stdio"
+      ]
     }
   }
 }
@@ -87,10 +94,10 @@ If you prefer to manage credentials via environment variables (as recommended in
       "env": {
         "FIGMA_API_KEY": "YOUR-KEY",
         "FIGMA_CACHING": "{\"ttl\":{\"value\":30,\"unit\":\"d\"}}",
-        "PORT": "3333"
-      }
-    }
-  }
+        "PORT": "3333",
+      },
+    },
+  },
 }
 ```
 
@@ -101,7 +108,13 @@ If you need more information on how to configure the Framelink MCP for Figma, se
 To avoid hitting Figma's heavy rate limits, you can tell the MCP server to cache full file responses on disk by setting a `FIGMA_CACHING` environment variable that contains a JSON object.
 
 ```bash
-FIGMA_CACHING='{ "ttl": { "value": 30, "unit": "d" }, "cacheType": "node"  }'
+FIGMA_CACHING='{
+  "ttl": { "value": 30, "unit": "d" },
+  "cacheType": "subtree",
+  "subtreeRootsByFile": {
+    "FILE_KEY_A": ["10:20", "10:40"]
+  }
+}'
 ```
 
 Put this var into your mcp config json, see example above.
@@ -110,9 +123,23 @@ Put this var into your mcp config json, see example above.
 - `ttl` controls how long a cached file remains valid. It must contain a `value` (number) and a `unit` (`ms`, `s`, `m`, `h`, or `d`).
 - `cacheType` (optional) controls the cache granularity. Two modes are available:
   - `default` (default) — caches the entire Figma file by `fileKey`. One cache file per Figma document.
-  - `node` — caches by `fileKey` + `nodeId`. Each node gets its own cache file (e.g. `abc123-6995-3570.json`). Use this when a full-file response exceeds the MCP transfer size limit.
+  - `subtree` — eagerly seeds configured subtree roots for a file on the first node request, stores one payload per configured root, and reuses that cached subtree for later descendant lookups.
+- `subtreeRootsByFile` is required when `cacheType` is `subtree`. It maps each Figma `fileKey` to the root node IDs that should be seeded together.
 
-When caching is enabled the server always fetches the full Figma file once, stores it on disk, and serves subsequent `get_figma_data` / `get_raw_node` requests from the cached copy until it expires. Delete the files inside `cacheDir` if you need to force a refresh. Leaving `FIGMA_CACHING` unset keeps the default non-cached behavior.
+`cacheType: "node"` has been removed. Migrate those configs to `cacheType: "subtree"` and explicitly list the subtree root IDs you want cached per file.
+
+Default mode still fetches the full Figma file once, stores it on disk, and serves subsequent `get_figma_data` / `get_raw_node` requests from the cached copy until it expires.
+
+Subtree mode behaves differently:
+
+- The first `get_raw_node` request for a configured file seeds every configured subtree root for that file under one shared seed barrier.
+- Later requests for those roots or any descendant node reuse the seeded subtree payloads without additional Figma API calls.
+- Requests for nodes outside the configured subtrees still call Figma directly and are not added to the subtree cache.
+- If any configured subtree root fails during seeding, the server discards the partial subtree state and fails the request instead of serving a mixed cache.
+- If the subtree config changes, or if the manifest, index, or subtree payloads drift or expire, the next request reseeds the configured roots.
+- The server does not infer ancestry from node ID syntax. Only descendants present in the seeded subtree payloads are considered owned by a configured root.
+
+Delete the files inside `cacheDir` if you need to force a refresh. Leaving `FIGMA_CACHING` unset keeps the default non-cached behavior.
 
 ## Learn More
 
