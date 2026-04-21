@@ -23,6 +23,7 @@ export type FigmaAuthOptions = {
   figmaApiKey: string;
   figmaOAuthToken: string;
   useOAuth: boolean;
+  baseUrl?: string;
 };
 
 export type CacheInfo = {
@@ -47,19 +48,20 @@ export class FigmaService {
   private readonly apiKey: string;
   private readonly oauthToken: string;
   private readonly useOAuth: boolean;
-  private readonly baseUrl = "https://api.figma.com/v1";
+  private readonly baseUrl: string;
   private readonly fileCache?: FigmaFileCache;
   private readonly subtreeRootsByFile: Record<string, string[]>;
   private readonly cacheTtlMs?: number;
   private readonly subtreeSeedPromises = new Map<string, Promise<void>>();
 
   constructor(
-    { figmaApiKey, figmaOAuthToken, useOAuth }: FigmaAuthOptions,
+    { figmaApiKey, figmaOAuthToken, useOAuth, baseUrl }: FigmaAuthOptions,
     cachingOptions?: FigmaCachingOptions,
   ) {
     this.apiKey = figmaApiKey || "";
     this.oauthToken = figmaOAuthToken || "";
     this.useOAuth = !!useOAuth && !!this.oauthToken;
+    this.baseUrl = baseUrl || "https://api.figma.com/v1";
     this.subtreeRootsByFile = cachingOptions?.subtreeRootsByFile ?? {};
     this.cacheTtlMs = cachingOptions?.ttlMs;
     if (cachingOptions) {

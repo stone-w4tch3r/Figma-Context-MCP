@@ -47,6 +47,26 @@ describe("FigmaFileCache", () => {
     }
   });
 
+  it("allows concurrent writes for the same file key", async () => {
+    const dir = await createTempDir();
+    try {
+      const cache = new FigmaFileCache({ cacheDir: dir, ttlMs: 60_000 });
+
+      await expect(
+        Promise.all([
+          cache.setFile("ABC", SAMPLE_FILE),
+          cache.setFile("ABC", SAMPLE_FILE),
+          cache.setFile("ABC", SAMPLE_FILE),
+        ]),
+      ).resolves.toEqual([undefined, undefined, undefined]);
+
+      const loaded = await cache.getFile("ABC");
+      expect(loaded?.data.name).toBe("Test File");
+    } finally {
+      await cleanupDir(dir);
+    }
+  });
+
   it("persists subtree entry metadata", async () => {
     const dir = await createTempDir();
     try {

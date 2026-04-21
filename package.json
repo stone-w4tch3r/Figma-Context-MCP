@@ -19,6 +19,8 @@
     "start": "node dist/bin.js",
     "start:cli": "cross-env NODE_ENV=cli node dist/bin.js",
     "start:http": "node dist/bin.js",
+    "mock:figma": "tsx scripts/mock-figma-server.ts",
+    "mock:mcp:stdio": "tsx scripts/mock-mcp-stdio.ts",
     "dev": "cross-env NODE_ENV=development tsup --watch",
     "dev:cli": "cross-env NODE_ENV=development tsup --watch -- --stdio",
     "lint": "eslint .",

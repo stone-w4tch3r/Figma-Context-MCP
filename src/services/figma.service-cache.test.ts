@@ -65,6 +65,13 @@ function createRootBResponse(): GetFileNodesResponse {
   });
 }
 
+function createOverlappingRootBResponse(): GetFileNodesResponse {
+  return createNodeResponse({
+    rootId: "10:40",
+    children: [{ id: "10:21", children: [] }],
+  });
+}
+
 function createUnrelatedNodeResponse(nodeId = "99:1"): GetFileNodesResponse {
   return createNodeResponse({ rootId: nodeId, children: [] });
 }
@@ -488,6 +495,41 @@ describe("FigmaService caching", () => {
       expect(first.data.nodes["10:21"]?.document.id).toBe("10:21");
       expect(second.data.nodes["10:22"]?.document.id).toBe("10:22");
       expect(requestSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      requestSpy.mockRestore();
+      fullFileSpy.mockRestore();
+      await cleanup(cacheDir);
+    }
+  });
+
+  it("fails subtree seeding when configured roots overlap", async () => {
+    const cacheDir = await createCacheDir();
+    const requestSpy = spyOnRequestWithSize().mockImplementation(async (endpoint) => {
+      if (endpoint.includes("ids=10:20")) {
+        return { data: createRootAResponse(), rawSize: 100 };
+      }
+
+      if (endpoint.includes("ids=10:40")) {
+        return { data: createOverlappingRootBResponse(), rawSize: 100 };
+      }
+
+      throw new Error(`unexpected endpoint: ${endpoint}`);
+    });
+    const fullFileSpy = spyOnRequest().mockImplementation(async (endpoint) => {
+      throw new Error(`unexpected file endpoint: ${endpoint}`);
+    });
+
+    try {
+      const service = new FigmaService(AUTH_OPTIONS, {
+        cacheDir,
+        ttlMs: 60_000,
+        cacheType: "subtree",
+        subtreeRootsByFile: { FILE789: ["10:20", "10:40"] },
+      });
+
+      await expect(service.getRawNode("FILE789", "10:21")).rejects.toThrow(
+        /overlapping subtree roots/i,
+      );
     } finally {
       requestSpy.mockRestore();
       fullFileSpy.mockRestore();

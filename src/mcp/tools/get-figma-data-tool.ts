@@ -14,7 +14,7 @@ import { getFigmaData as runGetFigmaData } from "~/services/get-figma-data.js";
 const parameters = {
   fileKey: z
     .string()
-    .regex(/^[a-zA-Z0-9]+$/, "File key must be alphanumeric")
+    .regex(/^[a-zA-Z0-9]+$/, "File key must contain only letters and numbers")
     .describe(
       "The key of the Figma file to fetch, often found in a provided URL like figma.com/(file|design)/<fileKey>/...",
     ),

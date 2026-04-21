@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   access,
   constants,
@@ -315,7 +316,7 @@ export class FigmaFileCache {
   private async writeJsonFile(cachePath: string, payload: unknown): Promise<void> {
     await this.waitForInit();
 
-    const tempPath = `${cachePath}.tmp`;
+    const tempPath = `${cachePath}.${randomUUID()}.tmp`;
 
     try {
       await writeFile(tempPath, JSON.stringify(payload, null, 2));

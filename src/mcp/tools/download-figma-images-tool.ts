@@ -15,7 +15,7 @@ import { sendProgress, startProgressHeartbeat, type ToolExtra } from "../progres
 const parameters = {
   fileKey: z
     .string()
-    .regex(/^[a-zA-Z0-9]+$/, "File key must be alphanumeric")
+    .regex(/^[a-zA-Z0-9]+$/, "File key must contain only letters and numbers")
     .describe("The key of the Figma file containing the images"),
   nodes: z
     .object({

@@ -125,6 +125,7 @@ Put this var into your mcp config json, see example above.
   - `default` (default) — caches the entire Figma file by `fileKey`. One cache file per Figma document.
   - `subtree` — eagerly seeds configured subtree roots for a file on the first node request, stores one payload per configured root, and reuses that cached subtree for later descendant lookups.
 - `subtreeRootsByFile` is required when `cacheType` is `subtree`. It maps each Figma `fileKey` to the root node IDs that should be seeded together.
+- Configured subtree roots must be disjoint in the actual Figma tree. If one configured root contains another configured root or they share a descendant, the first subtree-backed request fails and the partial seed is discarded.
 
 `cacheType: "node"` has been removed. Migrate those configs to `cacheType: "subtree"` and explicitly list the subtree root IDs you want cached per file.
 
