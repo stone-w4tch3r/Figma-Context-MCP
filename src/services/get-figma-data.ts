@@ -1,6 +1,5 @@
 import type { GetFileResponse, GetFileNodesResponse } from "@figma/rest-api-spec";
-import { FigmaService } from "~/services/figma.js";
-import type { CacheInfo } from "~/services/figma.js";
+import { FigmaService, type CacheInfo } from "~/services/figma.js";
 import {
   simplifyRawFigmaObject,
   allExtractors,
@@ -80,6 +79,7 @@ export async function getFigmaData(
   const { fileKey, nodeId, depth } = input;
   const startedAt = Date.now();
   let metrics: GetFigmaDataMetrics | undefined;
+  let cacheInfo: CacheInfo | undefined;
   let caughtError: unknown;
   // Per-call counter shared with the walker. Lives in the call closure so
   // overlapping HTTP requests each have their own — no module-global state.
@@ -87,7 +87,12 @@ export async function getFigmaData(
 
   try {
     await hooks.onFetchStart?.();
-    let rawResult: { data: GetFileResponse | GetFileNodesResponse; rawSize: number; cacheInfo?: CacheInfo };
+    let rawResult: {
+      data: GetFileResponse | GetFileNodesResponse;
+      rawSize: number;
+      cacheInfo?: CacheInfo;
+    };
+    
     const fetchStart = Date.now();
     try {
       if (nodeId) {
@@ -102,6 +107,7 @@ export async function getFigmaData(
     }
     const fetchMs = Date.now() - fetchStart;
     const rawApiResponse = rawResult.data;
+    cacheInfo = rawResult.cacheInfo;
     const rawSizeKb = rawResult.rawSize / 1024;
 
     await hooks.onSimplifyStart?.({ getNodeCount: () => nodeCounter.count });
@@ -157,7 +163,7 @@ export async function getFigmaData(
       simplifyMs,
       serializeMs,
     };
-    return { formatted, metrics, cacheInfo: rawResult.cacheInfo };
+    return { formatted, metrics, cacheInfo };
   } catch (error) {
     caughtError = error;
     throw error;

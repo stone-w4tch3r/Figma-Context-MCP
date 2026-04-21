@@ -4,13 +4,13 @@ import { type AuthMode, type ClientInfo, type Transport } from "~/telemetry/inde
 import { FigmaService, type FigmaAuthOptions } from "../services/figma.js";
 import { Logger } from "../utils/logger.js";
 import type { ToolExtra } from "./progress.js";
+import { installValidationRejectCapture } from "./validation-capture.js";
 import {
   downloadFigmaImagesTool,
   getFigmaDataTool,
   type DownloadImagesParams,
   type GetFigmaDataParams,
 } from "./tools/index.js";
-import { installValidationRejectCapture } from "./validation-capture.js";
 
 const serverInfo = {
   name: "Figma MCP Server",
