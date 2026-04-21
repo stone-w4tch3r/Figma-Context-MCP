@@ -1,5 +1,12 @@
 # figma-developer-mcp
 
+## [0.19.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.18.0...v0.19.0) (2026-04-21)
+
+
+### Features
+
+* add node-level cache granularity via cacheType option ([4ac5758](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/4ac5758b4d8903412ba0e8ad293df3febc8c4453))
+
 ## [0.18.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.17.1...v0.18.0) (2026-04-21)
 
 
