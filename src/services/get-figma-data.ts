@@ -92,7 +92,7 @@ export async function getFigmaData(
       rawSize: number;
       cacheInfo?: CacheInfo;
     };
-    
+
     const fetchStart = Date.now();
     try {
       if (nodeId) {
