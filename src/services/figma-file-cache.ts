@@ -1,20 +1,27 @@
 import { access, constants, mkdir, readFile, rename, unlink, writeFile } from "fs/promises";
 import path from "path";
-import type { GetFileResponse } from "@figma/rest-api-spec";
+import type { GetFileResponse, GetFileNodesResponse } from "@figma/rest-api-spec";
 import { Logger } from "~/utils/logger.js";
+
+export type FigmaCacheType = "default" | "node";
 
 export type FigmaCachingOptions = {
   cacheDir: string;
   ttlMs: number;
+  cacheType?: FigmaCacheType;
 };
 
 type StoredFilePayload = {
   fetchedAt: number;
-  data: GetFileResponse;
+  data: GetFileResponse | GetFileNodesResponse;
 };
 
 export class FigmaFileCache {
   private initPromise: Promise<void>;
+
+  get cacheType(): FigmaCacheType {
+    return this.options.cacheType ?? "default";
+  }
 
   constructor(private readonly options: FigmaCachingOptions) {
     this.initPromise = this.initialize();
@@ -41,8 +48,12 @@ export class FigmaFileCache {
     await this.initPromise;
   }
 
-  private getCachePath(fileKey: string): string {
-    return path.join(this.options.cacheDir, `${fileKey}.json`);
+  private getCachePath(fileKey: string, nodeId?: string): string {
+    const cacheKey =
+      nodeId && this.options.cacheType === "node"
+        ? `${fileKey}-${nodeId.replace(/[:/;]/g, "-")}`
+        : fileKey;
+    return path.join(this.options.cacheDir, `${cacheKey}.json`);
   }
 
   private isExpired(fetchedAt: number): boolean {
@@ -51,14 +62,19 @@ export class FigmaFileCache {
 
   async get(
     fileKey: string,
-  ): Promise<{ data: GetFileResponse; cachedAt: number; ttlMs: number } | null> {
+    nodeId?: string,
+  ): Promise<{
+    data: GetFileResponse | GetFileNodesResponse;
+    cachedAt: number;
+    ttlMs: number;
+  } | null> {
     await this.waitForInit();
 
     // NOTE: Race condition possible - if multiple requests for the same uncached file
     // arrive concurrently, they may all make separate API calls. This is a rare edge case
     // and the complexity of deduplication is not warranted for this use case.
 
-    const cachePath = this.getCachePath(fileKey);
+    const cachePath = this.getCachePath(fileKey, nodeId);
 
     try {
       const fileContents = await readFile(cachePath, "utf-8");
@@ -92,10 +108,14 @@ export class FigmaFileCache {
     }
   }
 
-  async set(fileKey: string, data: GetFileResponse): Promise<void> {
+  async set(
+    fileKey: string,
+    data: GetFileResponse | GetFileNodesResponse,
+    nodeId?: string,
+  ): Promise<void> {
     await this.waitForInit();
 
-    const cachePath = this.getCachePath(fileKey);
+    const cachePath = this.getCachePath(fileKey, nodeId);
     const tempPath = `${cachePath}.tmp`;
     const payload: StoredFilePayload = {
       fetchedAt: Date.now(),

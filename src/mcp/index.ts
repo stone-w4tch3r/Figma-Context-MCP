@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FigmaCachingOptions } from "~/services/figma-file-cache.js";
+import { type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
 import { FigmaService, type FigmaAuthOptions } from "../services/figma.js";
 import { Logger } from "../utils/logger.js";
 import type { ToolExtra } from "./progress.js";
@@ -10,7 +11,6 @@ import {
   type DownloadImagesParams,
   type GetFigmaDataParams,
 } from "./tools/index.js";
-import { type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
 
 const serverInfo = {
   name: "Figma MCP Server",

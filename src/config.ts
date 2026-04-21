@@ -1,7 +1,7 @@
 import { config as loadEnv } from "dotenv";
 import os from "os";
 import { isAbsolute, join, resolve as resolvePath } from "path";
-import type { FigmaCachingOptions } from "./services/figma-file-cache.js";
+import type { FigmaCacheType, FigmaCachingOptions } from "./services/figma-file-cache.js";
 import type { FigmaAuthOptions } from "./services/figma.js";
 import { resolveTelemetryEnabled } from "./telemetry/index.js";
 
@@ -184,7 +184,15 @@ export function getServerConfig(flags: ServerFlags): ServerConfig {
     );
     console.log(`- IMAGE_DIR: ${imageDir.value} (source: ${configSources.imageDir})`);
     console.log(
-      `- FIGMA_CACHING: ${caching ? JSON.stringify({ cacheDir: caching.cacheDir, ttlMs: caching.ttlMs }) : "disabled"} (source: ${configSources.caching})`,
+      `- FIGMA_CACHING: ${
+        caching
+          ? JSON.stringify({
+              cacheDir: caching.cacheDir,
+              ttlMs: caching.ttlMs,
+              cacheType: caching.cacheType,
+            })
+          : "disabled"
+      } (source: ${configSources.caching})`,
     );
     const telemetryEnabled = resolveTelemetryEnabled(noTelemetry);
     console.log(
@@ -214,6 +222,7 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
   try {
     const parsed = JSON.parse(rawValue) as {
       cacheDir?: string;
+      cacheType?: FigmaCacheType;
       ttl: {
         value: number;
         unit: DurationUnit;
@@ -232,9 +241,18 @@ function parseCachingConfig(rawValue: string | undefined): FigmaCachingOptions |
       throw new Error("FIGMA_CACHING.ttl.unit must be one of ms, s, m, h, d");
     }
 
+    if (
+      parsed.cacheType !== undefined &&
+      parsed.cacheType !== "default" &&
+      parsed.cacheType !== "node"
+    ) {
+      throw new Error("FIGMA_CACHING.cacheType must be 'default' or 'node'");
+    }
+
     return {
       cacheDir: resolveCacheDir(parsed.cacheDir),
       ttlMs: parsed.ttl.value * DURATION_IN_MS[parsed.ttl.unit],
+      cacheType: parsed.cacheType ?? "default",
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

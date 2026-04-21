@@ -8,9 +8,9 @@ import type {
   Transform,
 } from "@figma/rest-api-spec";
 import { downloadAndProcessImage, type ImageProcessingResult } from "~/utils/image-processing.js";
-import { Logger, writeLogs } from "~/utils/logger.js";
-import { fetchJSON } from "~/utils/fetch-json.js";
 import { getErrorMeta } from "~/utils/error-meta.js";
+import { fetchJSON } from "~/utils/fetch-json.js";
+import { Logger, writeLogs } from "~/utils/logger.js";
 import { buildForbiddenMessage, buildRateLimitMessage } from "./errors/index.js";
 import { FigmaFileCache, type FigmaCachingOptions } from "./figma-file-cache.js";
 
@@ -302,6 +302,31 @@ export class FigmaService {
     nodeId: string,
     depth?: number | null,
   ): Promise<RawResponse<GetFileNodesResponse>> {
+    if (this.fileCache?.cacheType === "node") {
+      const cacheResult = await this.fileCache.get(fileKey, nodeId);
+      if (cacheResult) {
+        writeLogs("figma-raw.json", cacheResult.data);
+        return {
+          data: cacheResult.data as GetFileNodesResponse,
+          rawSize: sizeOfJson(cacheResult.data),
+          cacheInfo: {
+            usedCache: true,
+            cachedAt: cacheResult.cachedAt,
+            ttlMs: cacheResult.ttlMs,
+          },
+        };
+      }
+
+      const endpoint = `/files/${fileKey}/nodes?ids=${nodeId}${depth ? `&depth=${depth}` : ""}`;
+      Logger.log(
+        `Retrieving raw Figma node: ${nodeId} from ${fileKey} (depth: ${depth ?? "default"})`,
+      );
+      const result = await this.requestWithSize<GetFileNodesResponse>(endpoint);
+      await this.fileCache.set(fileKey, result.data, nodeId);
+      writeLogs("figma-raw.json", result.data);
+      return { ...result, cacheInfo: { usedCache: false } };
+    }
+
     if (this.fileCache) {
       const cacheResult = await this.loadFileFromCache(fileKey);
       const data = buildNodeResponseFromFile(cacheResult.data, nodeId, depth);
@@ -332,7 +357,7 @@ export class FigmaService {
     const cacheResult = await this.fileCache.get(fileKey);
     if (cacheResult) {
       return {
-        data: cacheResult.data,
+        data: cacheResult.data as GetFileResponse,
         cacheInfo: {
           usedCache: true,
           cachedAt: cacheResult.cachedAt,
