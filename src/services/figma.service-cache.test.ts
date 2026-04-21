@@ -94,12 +94,67 @@ describe("FigmaService caching", () => {
       await cleanup(cacheDir);
     }
   });
+
+  it("caches node responses independently when cacheType is node", async () => {
+    const cacheDir = await createCacheDir();
+    const sample = {
+      name: "Sample",
+      lastModified: new Date().toISOString(),
+      thumbnailUrl: "",
+      version: "1",
+      role: "viewer",
+      editorType: "figma",
+      nodes: {
+        "10:20": {
+          document: {
+            id: "10:20",
+            name: "Frame",
+            type: "FRAME",
+            children: [],
+          },
+          components: {},
+          componentSets: {},
+          styles: {},
+          schemaVersion: 0,
+        },
+      },
+    };
+    const requestSpy = spyOnRequestWithSize().mockResolvedValue({ data: sample, rawSize: 128 });
+
+    try {
+      const service = new FigmaService(AUTH_OPTIONS, {
+        cacheDir,
+        ttlMs: 60_000,
+        cacheType: "node",
+      });
+
+      const first = await service.getRawNode("FILE789", "10:20");
+      const second = await service.getRawNode("FILE789", "10:20");
+
+      expect(first.data.nodes["10:20"]).toBeDefined();
+      expect(second.cacheInfo?.usedCache).toBe(true);
+      expect(requestSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      requestSpy.mockRestore();
+      await cleanup(cacheDir);
+    }
+  });
 });
+
 function spyOnRequest() {
   return vi.spyOn(
     FigmaService.prototype as unknown as {
       request: (endpoint: string) => Promise<unknown>;
     },
     "request",
+  );
+}
+
+function spyOnRequestWithSize() {
+  return vi.spyOn(
+    FigmaService.prototype as unknown as {
+      requestWithSize: (endpoint: string) => Promise<unknown>;
+    },
+    "requestWithSize",
   );
 }

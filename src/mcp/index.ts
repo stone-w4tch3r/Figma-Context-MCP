@@ -1,68 +1,123 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FigmaCachingOptions } from "~/services/figma-file-cache.js";
+import { type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
 import { FigmaService, type FigmaAuthOptions } from "../services/figma.js";
 import { Logger } from "../utils/logger.js";
+import type { ToolExtra } from "./progress.js";
 import {
   downloadFigmaImagesTool,
   getFigmaDataTool,
   type DownloadImagesParams,
   type GetFigmaDataParams,
 } from "./tools/index.js";
-import type { FigmaCachingOptions } from "~/services/figma-file-cache.js";
+import { installValidationRejectCapture } from "./validation-capture.js";
 
 const serverInfo = {
   name: "Figma MCP Server",
   version: process.env.NPM_PACKAGE_VERSION ?? "unknown",
+  description:
+    "Gives AI coding agents access to Figma design data, providing layout, styling, and content information for implementing designs.",
 };
 
+type ServerTransport = Extract<Transport, "stdio" | "http">;
+
 type CreateServerOptions = {
-  isHTTP?: boolean;
+  transport: ServerTransport;
   outputFormat?: "yaml" | "json";
   skipImageDownloads?: boolean;
+  imageDir?: string;
   caching?: FigmaCachingOptions;
 };
 
 function createServer(
   authOptions: FigmaAuthOptions,
   {
-    isHTTP = false,
+    transport,
     outputFormat = "yaml",
     skipImageDownloads = false,
+    imageDir,
     caching,
-  }: CreateServerOptions = {},
+  }: CreateServerOptions,
 ) {
   const server = new McpServer(serverInfo);
   const figmaService = new FigmaService(authOptions, caching);
-  registerTools(server, figmaService, { outputFormat, skipImageDownloads });
+  const authMode: AuthMode = authOptions.useOAuth ? "oauth" : "api_key";
 
-  Logger.isHTTP = isHTTP;
+  const getClientInfo = (): ClientInfo | undefined => {
+    const info = server.server.getClientVersion();
+    if (!info) return undefined;
+    return { name: info.name, version: info.version };
+  };
+
+  registerTools(server, figmaService, {
+    transport,
+    authMode,
+    outputFormat,
+    skipImageDownloads,
+    imageDir,
+    getClientInfo,
+  });
+
+  installValidationRejectCapture(server, { transport, authMode, getClientInfo });
+
+  Logger.isHTTP = transport !== "stdio";
 
   return server;
 }
 
+type RegisterToolsOptions = {
+  transport: ServerTransport;
+  authMode: AuthMode;
+  outputFormat: "yaml" | "json";
+  skipImageDownloads: boolean;
+  imageDir?: string;
+  getClientInfo: () => ClientInfo | undefined;
+};
+
 function registerTools(
   server: McpServer,
   figmaService: FigmaService,
-  options: {
-    outputFormat: "yaml" | "json";
-    skipImageDownloads: boolean;
-  },
+  options: RegisterToolsOptions,
 ): void {
-  // Register get_figma_data tool
-  server.tool(
+  server.registerTool(
     getFigmaDataTool.name,
-    getFigmaDataTool.description,
-    getFigmaDataTool.parameters,
-    (params: GetFigmaDataParams) =>
-      getFigmaDataTool.handler(params, figmaService, options.outputFormat),
+    {
+      title: "Get Figma Data",
+      description: getFigmaDataTool.description,
+      inputSchema: getFigmaDataTool.parametersSchema,
+      annotations: { readOnlyHint: true },
+    },
+    (params: GetFigmaDataParams, extra: ToolExtra) =>
+      getFigmaDataTool.handler(
+        params,
+        figmaService,
+        options.outputFormat,
+        options.transport,
+        options.authMode,
+        options.getClientInfo(),
+        extra,
+      ),
   );
 
-  // Register download_figma_images tool if CLI flag or env var is not set
   if (!options.skipImageDownloads) {
-    server.tool(
+    server.registerTool(
       downloadFigmaImagesTool.name,
-      downloadFigmaImagesTool.description,
-      downloadFigmaImagesTool.parameters,
-      (params: DownloadImagesParams) => downloadFigmaImagesTool.handler(params, figmaService),
+      {
+        title: "Download Figma Images",
+        description: downloadFigmaImagesTool.getDescription(options.imageDir),
+        inputSchema: downloadFigmaImagesTool.parametersSchema,
+        annotations: { openWorldHint: true },
+      },
+      (params: DownloadImagesParams, extra: ToolExtra) =>
+        downloadFigmaImagesTool.handler(
+          params,
+          figmaService,
+          options.imageDir,
+          options.transport,
+          options.authMode,
+          options.getClientInfo(),
+          extra,
+        ),
     );
   }
 }

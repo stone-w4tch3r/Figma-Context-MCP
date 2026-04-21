@@ -20,23 +20,19 @@ describeOrSkip("Figma MCP Server Tests", () => {
     figmaApiKey = process.env.FIGMA_API_KEY || "";
     figmaFileKey = process.env.FIGMA_FILE_KEY || "";
 
-    server = createServer({
-      figmaApiKey,
-      figmaOAuthToken: "",
-      useOAuth: false,
-    });
-
-    client = new Client(
+    server = createServer(
       {
-        name: "figma-test-client",
-        version: "1.0.0",
+        figmaApiKey,
+        figmaOAuthToken: "",
+        useOAuth: false,
       },
-      {
-        capabilities: {
-          tools: {},
-        },
-      },
+      { transport: "stdio" },
     );
+
+    client = new Client({
+      name: "figma-test-client",
+      version: "1.0.0",
+    });
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
@@ -64,7 +60,8 @@ describeOrSkip("Figma MCP Server Tests", () => {
         CallToolResultSchema,
       );
 
-      const content = result.content[0].text as string;
+      const firstContent = result.content[0];
+      const content = firstContent.type === "text" ? firstContent.text : "";
       const parsed = yaml.load(content);
 
       expect(parsed).toBeDefined();
