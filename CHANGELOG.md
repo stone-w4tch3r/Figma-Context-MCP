@@ -1,5 +1,12 @@
 # figma-developer-mcp
 
+## [0.21.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.20.0...v0.21.0) (2026-04-22)
+
+
+### Miscellaneous Chores
+
+* align server manifest version metadata ([27b60a8](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/27b60a827abba811a1b5e491cdfd8a7bd0ac987d))
+
 ## [0.20.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.19.0...v0.20.0) (2026-04-22)
 
 
