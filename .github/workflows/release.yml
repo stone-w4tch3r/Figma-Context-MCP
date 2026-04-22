@@ -52,9 +52,3 @@ jobs:
           NODE_ENV: production
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
         if: ${{ steps.release.outputs.release_created }}
-
-      - name: Update server.json version
-        run: |
-          VERSION="${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
-          jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > server.tmp && mv server.tmp server.json
-        if: ${{ steps.release.outputs.release_created }}

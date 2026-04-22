@@ -6,12 +6,12 @@
     "url": "https://github.com/stone-w4tch3r/Figma-Context-MCP",
     "source": "github"
   },
-  "version": "0.20.0",
+  "version": "0.21.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "figma-developer-mcp-caching-dev-fork",
-      "version": "0.20.0",
+      "version": "0.21.0",
       "transport": {
         "type": "stdio"
       },
