@@ -152,6 +152,16 @@ describe("layout alignment", () => {
   });
 
   describe("alignItems stretch detection", () => {
+    test("missing children array does not crash and falls back to enum value", () => {
+      const node = makeFrame({
+        layoutMode: "HORIZONTAL",
+        counterAxisAlignItems: "CENTER",
+      }) as Record<string, unknown>;
+      delete node.children;
+
+      expect(buildSimplifiedLayout(node as unknown as FigmaDocumentNode).alignItems).toBe("center");
+    });
+
     test("row: all children fill cross axis → stretch", () => {
       const node = makeFrame({
         layoutMode: "HORIZONTAL",
