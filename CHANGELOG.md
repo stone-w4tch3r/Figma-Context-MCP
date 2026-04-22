@@ -1,5 +1,18 @@
 # figma-developer-mcp
 
+## [0.20.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.19.0...v0.20.0) (2026-04-22)
+
+
+### Features
+
+* replace node cache mode with subtree seeding ([dd700e7](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/dd700e74a90843353adfe4b0527349b5caf3cbb9))
+
+
+### Bug Fixes
+
+* clarify subtree caching README docs ([de80cf4](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/de80cf47e9f4186293d300ef2da4f2f6812603bf))
+* handle missing frame children in alignItems ([4f5e0d5](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/4f5e0d56dd02ccf067f74b1743e53ad810a50c62))
+
 ## [0.19.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.18.0...v0.19.0) (2026-04-21)
 
 
