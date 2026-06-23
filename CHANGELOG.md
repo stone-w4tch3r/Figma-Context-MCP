@@ -1,5 +1,12 @@
 # figma-developer-mcp
 
+## [0.23.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.22.0...v0.23.0) (2026-06-23)
+
+
+### Features
+
+* switch to npm OIDC trusted publishing, remove NPM_ACCESS_TOKEN ([7631a9d](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/7631a9d0ab474145f7dda86afe1c76c60c077c92))
+
 ## [0.22.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.21.0...v0.22.0) (2026-06-23)
 
 
