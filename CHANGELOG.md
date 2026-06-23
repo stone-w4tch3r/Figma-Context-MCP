@@ -2,18 +2,15 @@
 
 ## [0.21.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.20.0...v0.21.0) (2026-04-22)
 
-
 ### Miscellaneous Chores
 
 * align server manifest version metadata ([27b60a8](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/27b60a827abba811a1b5e491cdfd8a7bd0ac987d))
 
 ## [0.20.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.19.0...v0.20.0) (2026-04-22)
 
-
 ### Features
 
 * replace node cache mode with subtree seeding ([dd700e7](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/dd700e74a90843353adfe4b0527349b5caf3cbb9))
-
 
 ### Bug Fixes
 
@@ -22,13 +19,11 @@
 
 ## [0.19.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.18.0...v0.19.0) (2026-04-21)
 
-
 ### Features
 
 * add node-level cache granularity via cacheType option ([4ac5758](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/4ac5758b4d8903412ba0e8ad293df3febc8c4453))
 
 ## [0.18.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.17.1...v0.18.0) (2026-04-21)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -47,7 +42,6 @@
 * rich text styling ([#351](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/351)) ([759d0e4](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/759d0e4f7877677980d9cee18c8f895bee655394))
 * support gifRef for downloading animated GIF embeds ([#286](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/286)) ([f1ec913](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/f1ec9133c31a351b55651126c20ea2f842c0a9ee))
 
-
 ### Bug Fixes
 
 * add actionable 403 error message with troubleshooting link ([9230bd0](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/9230bd02a63085d88ca5d3687275f2cba9557309))
@@ -64,11 +58,9 @@
 * surface Figma 403 response body to help LLMs self-heal based on actual error ([#360](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/360)) ([12280ba](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/12280ba22a8d398c35db360a336356430dd0b182))
 * throw actionable error for missing nodes, add error_category to telemetry ([#344](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/344)) ([334ae2b](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/334ae2bbecbd3583922098787877448337acf6cb))
 
-
 ### Performance Improvements
 
 * fix O(n²) bottlenecks in simplification and YAML serialization ([#307](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/307)) ([29cff0c](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/29cff0cbd6d2fd0459900e9c3cbc49f64e47075d))
-
 
 ### Code Refactoring
 
@@ -76,14 +68,12 @@
 
 ## [0.17.1](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.17.0...v0.17.1) (2026-03-11)
 
-
 ### Bug Fixes
 
 * upgrade MCP SDK to 1.27.1 and modernize tool registration ([#282](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/282)) ([4153e5f](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/4153e5f857aa708ee9ee10156e553c1289f03cf7))
 * use Node 24 in release workflow for npm OIDC support ([11ba7c6](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/11ba7c6a2e22910c483592ba7cdc1966fcdc9166))
 
 ## [0.17.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.16.0...v0.17.0) (2026-02-26)
-
 
 ### Features
 
@@ -93,7 +83,6 @@
 * **security:** add input validation to download images tool ([#207](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/207)) ([651974e](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/651974e6f31a3b60b863dab12e69029c710dd1c0))
 * **security:** add path sanitization to prevent directory traversal ([#206](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/206)) ([5a18eef](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/5a18eef889b0449894e835f71b15786e4e36dd10))
 * sync fork with upstream - release-please migration, vitest, repo cleanup ([2124f43](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/2124f43fa5a27135c06b53b1da6b8e3733990be4))
-
 
 ### Bug Fixes
 
@@ -128,13 +117,11 @@
 
 ## [0.6.6](https://github.com/GLips/Figma-Context-MCP/compare/v0.6.5...v0.6.6) (2026-03-04)
 
-
 ### Bug Fixes
 
 * use Node 24 in release workflow for npm OIDC support ([11ba7c6](https://github.com/GLips/Figma-Context-MCP/commit/11ba7c6a2e22910c483592ba7cdc1966fcdc9166))
 
 ## [0.6.5](https://github.com/GLips/Figma-Context-MCP/compare/v0.6.4...v0.6.5) (2026-03-04)
-
 
 ### Bug Fixes
 

@@ -7,7 +7,9 @@ import { ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { Server } from "http";
 import { EnvHttpProxyAgent, ProxyAgent, setGlobalDispatcher } from "undici";
 import type { ServerConfig } from "./config.js";
-import { createServer } from "./mcp/index.js";
+import { createServer, type CreateServerOptions } from "./mcp/index.js";
+import { requireGlobalCredentials, type ServerConfig } from "./config.js";
+import type { FigmaAuthOptions } from "./services/figma.js";
 import * as telemetry from "./telemetry/index.js";
 import { Logger } from "./utils/logger.js";
 import { hasProxyEnv, setProxyMode } from "./utils/proxy-env.js";
@@ -25,8 +27,16 @@ const activeConnections = new Set<ActiveConnection>();
  * Start the MCP server in either stdio or HTTP mode.
  */
 export async function startServer(config: ServerConfig): Promise<void> {
-  // Three outcomes: explicit proxy URL -> ProxyAgent; no proxy but env vars set
-  // -> EnvHttpProxyAgent; otherwise Node's default (includes `--proxy=none`,
+  // Stdio has no per-request credential channel, so the server is unusable
+  // without something resolved at startup. Fail fast BEFORE any side effects
+  // (proxy install, telemetry init) — preserves the pre-PR behavior where
+  // resolveAuth() exited early during config resolution.
+  if (config.isStdioMode) {
+    requireGlobalCredentials(config.auth);
+  }
+
+  // Three outcomes: explicit proxy URL → ProxyAgent; no proxy but env vars set
+  // → EnvHttpProxyAgent; otherwise Node's default (includes `--proxy=none`,
   // which lets users opt out of system-level proxy vars misbehaving for
   // api.figma.com — see issue #358).
   if (config.proxy && config.proxy !== "none") {
@@ -57,22 +67,32 @@ export async function startServer(config: ServerConfig): Promise<void> {
   };
 
   if (config.isStdioMode) {
+    // MCP clients spawn stdio servers with whatever cwd they were started in,
+    // which is rarely the user's project root. Warn so a missing --image-dir
+    // doesn't silently send images to e.g. the client's install directory.
+    // Gated on !skipImageDownloads — without the download tool the warning
+    // is misleading.
+    if (config.configSources.imageDir === "default" && !config.skipImageDownloads) {
+      process.stderr.write(
+        `Warning: --image-dir not set; download_figma_images will save under the server's cwd (${config.imageDir}). ` +
+          `MCP clients often launch the server outside your project root — set IMAGE_DIR or pass --image-dir to make this explicit.\n`,
+      );
+    }
     const server = createServer(config.auth, serverOptions);
     const transport = new StdioServerTransport();
     await server.connect(transport);
     registerShutdownHandlers(async () => {});
     return;
+  } else {
+    console.log(`Initializing Figma MCP Server in HTTP mode on ${config.host}:${config.port}...`);
+    await startHttpServer(config.host, config.port, config.auth, serverOptions);
+
+    registerShutdownHandlers(async () => {
+      Logger.log("Shutting down server...");
+      await stopHttpServer();
+      Logger.log("Server shutdown complete");
+    });
   }
-
-  const createMcpServer = () => createServer(config.auth, serverOptions);
-  console.log(`Initializing Figma MCP Server in HTTP mode on ${config.host}:${config.port}...`);
-  await startHttpServer(config.host, config.port, createMcpServer);
-
-  registerShutdownHandlers(async () => {
-    Logger.log("Shutting down server...");
-    await stopHttpServer();
-    Logger.log("Server shutdown complete");
-  });
 }
 
 /**
@@ -101,7 +121,8 @@ function registerShutdownHandlers(onShutdown: () => Promise<void>): void {
 export async function startHttpServer(
   host: string,
   port: number,
-  createMcpServer: () => McpServer,
+  baseAuth: FigmaAuthOptions,
+  serverOptions: Omit<CreateServerOptions, "transport">,
 ): Promise<Server> {
   if (httpServer) {
     throw new Error("HTTP server is already running");
@@ -111,20 +132,29 @@ export async function startHttpServer(
 
   const handlePost = async (req: Request, res: Response) => {
     Logger.log("Received StreamableHTTP request");
-    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
-    const mcpServer = createMcpServer();
-    const conn: ActiveConnection = { transport, server: mcpServer };
+    const requestKey = getRequestApiKey(req);
+    const requestBearerToken = getRequestBearerToken(req);
+    const auth = resolveRequestAuth(baseAuth, requestKey, requestBearerToken);
+    const requestSecrets = [requestKey, requestBearerToken].filter(
+      (secret): secret is string => !!secret,
+    );
 
-    activeConnections.add(conn);
-    res.on("close", () => {
-      activeConnections.delete(conn);
-      transport.close();
-      mcpServer.close();
+    // Request-level credentials are not known to telemetry's init-time
+    // redaction list, so make them available only for this request scope.
+    await telemetry.withRequestSecrets(requestSecrets, async () => {
+      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+      const mcpServer = createServer(auth, { ...serverOptions, transport: "http" });
+      const conn: ActiveConnection = { transport, server: mcpServer };
+      activeConnections.add(conn);
+      res.on("close", () => {
+        activeConnections.delete(conn);
+        transport.close();
+        mcpServer.close();
+      });
+      await mcpServer.connect(transport);
+      await transport.handleRequest(req, res, req.body);
+      Logger.log("StreamableHTTP request handled");
     });
-
-    await mcpServer.connect(transport);
-    await transport.handleRequest(req, res, req.body);
-    Logger.log("StreamableHTTP request handled");
   };
 
   const handleMethodNotAllowed = (_req: Request, res: Response) => {
@@ -163,6 +193,43 @@ export async function startHttpServer(
     });
     httpServer = server;
   });
+}
+
+function resolveRequestAuth(
+  baseAuth: FigmaAuthOptions,
+  requestKey: string | undefined,
+  requestBearerToken: string | undefined,
+): FigmaAuthOptions {
+  if (requestKey) {
+    return {
+      figmaApiKey: requestKey,
+      figmaOAuthToken: "",
+      useOAuth: false,
+    };
+  }
+
+  if (requestBearerToken) {
+    return {
+      figmaApiKey: "",
+      figmaOAuthToken: requestBearerToken,
+      useOAuth: true,
+    };
+  }
+
+  return baseAuth;
+}
+
+function getRequestApiKey(req: Request): string | undefined {
+  const value = req.headers["x-figma-token"];
+  if (Array.isArray(value)) return value[0]?.trim() || undefined;
+  return value?.trim() || undefined;
+}
+
+function getRequestBearerToken(req: Request): string | undefined {
+  const value = req.headers.authorization;
+  const header = Array.isArray(value) ? value[0] : value;
+  const match = header?.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() || undefined;
 }
 
 export async function stopHttpServer(): Promise<void> {
