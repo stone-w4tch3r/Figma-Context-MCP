@@ -1,5 +1,12 @@
 # figma-developer-mcp
 
+## [0.23.1](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.23.0...v0.23.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* use cache: pnpm instead of unsupported package-manager-cache in setup-node@v4 ([b30abf3](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/b30abf3cab07d01865a0908294fe3c8567ebeb65))
+
 ## [0.23.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.22.0...v0.23.0) (2026-06-23)
 
 
