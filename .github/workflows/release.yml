@@ -32,6 +32,7 @@ jobs:
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never use caching in release builds
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Install dependencies
@@ -46,9 +47,12 @@ jobs:
         run: pnpm build
         if: ${{ steps.release.outputs.release_created }}
 
+      # Trusted publishing via OIDC — no NODE_AUTH_TOKEN needed.
+      # The npm CLI auto-detects the OIDC environment and exchanges the
+      # id-token for a short-lived publish credential. Provenance is
+      # generated automatically.
       - name: Publish to npm
         run: npm publish --no-git-checks
         env:
           NODE_ENV: production
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
         if: ${{ steps.release.outputs.release_created }}
