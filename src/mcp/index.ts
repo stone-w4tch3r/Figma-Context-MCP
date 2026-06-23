@@ -1,9 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FigmaCachingOptions } from "~/services/figma-file-cache.js";
-import { type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
+import { authMode, type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
 import { FigmaService, type FigmaAuthOptions } from "../services/figma.js";
 import { Logger } from "../utils/logger.js";
-import { authMode, type AuthMode, type ClientInfo, type Transport } from "~/telemetry/index.js";
 import type { OutputFormat } from "~/utils/serialize.js";
 import type { ToolExtra } from "./progress.js";
 import { installValidationRejectCapture } from "./validation-capture.js";

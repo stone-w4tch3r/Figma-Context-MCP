@@ -6,9 +6,8 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { Server } from "http";
 import { EnvHttpProxyAgent, ProxyAgent, setGlobalDispatcher } from "undici";
-import type { ServerConfig } from "./config.js";
-import { createServer, type CreateServerOptions } from "./mcp/index.js";
 import { requireGlobalCredentials, type ServerConfig } from "./config.js";
+import { createServer, type CreateServerOptions } from "./mcp/index.js";
 import type { FigmaAuthOptions } from "./services/figma.js";
 import * as telemetry from "./telemetry/index.js";
 import { Logger } from "./utils/logger.js";

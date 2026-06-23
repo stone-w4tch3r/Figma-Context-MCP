@@ -18,14 +18,15 @@ export function convertJustifyContent(align?: HasFramePropertiesTrait["primaryAx
 
 export function convertAlignItems(
   align: HasFramePropertiesTrait["counterAxisAlignItems"] | undefined,
-  children: FigmaDocumentNode[],
+  children: FigmaDocumentNode[] | undefined,
   mode: "row" | "column",
 ) {
   // Row cross-axis is vertical; column cross-axis is horizontal
   const crossSizing = mode === "row" ? "layoutSizingVertical" : "layoutSizingHorizontal";
+  const childNodes = children ?? [];
   const allStretch =
-    children.length > 0 &&
-    children.every(
+    childNodes.length > 0 &&
+    childNodes.every(
       (c) =>
         ("layoutPositioning" in c && c.layoutPositioning === "ABSOLUTE") ||
         (crossSizing in c && (c as Record<string, unknown>)[crossSizing] === "FILL"),
