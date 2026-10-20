@@ -33,7 +33,6 @@ export function buildSimplifiedLayout(
   return { ...frameValues, ...layoutValues };
 }
 
-
 function buildSimplifiedFrameValues(n: FigmaDocumentNode): SimplifiedLayout | { mode: "none" } {
   if (!isFrame(n)) {
     return { mode: "none" };
