@@ -1,5 +1,18 @@
 # figma-developer-mcp
 
+## [0.24.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.23.0...v0.24.0) (2026-10-20)
+
+
+### Features
+
+* sync fork with upstream ([9f9e1c6](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/9f9e1c6a73e2a9e19d8d810c58d2c13af769a5eb))
+
+
+### Bug Fixes
+
+* use cache: pnpm instead of unsupported package-manager-cache in setup-node@v4 ([b30abf3](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/b30abf3cab07d01865a0908294fe3c8567ebeb65))
+* use canonical style comparison and guard aspect-ratio divide-by-zero ([#402](https://github.com/stone-w4tch3r/Figma-Context-MCP/issues/402)) ([c083d65](https://github.com/stone-w4tch3r/Figma-Context-MCP/commit/c083d65c7e002923e7cb98f4e3bdafb105e90f6d))
+
 ## [0.23.0](https://github.com/stone-w4tch3r/Figma-Context-MCP/compare/v0.22.0...v0.23.0) (2026-06-23)
 
 
